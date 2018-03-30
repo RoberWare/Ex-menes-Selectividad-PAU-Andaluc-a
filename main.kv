@@ -1,0 +1,760 @@
+#:import time time
+#:import math math
+#:import os os
+#:import partial functools.partial 
+
+#:import NavigationDrawer kivy.garden.navigationdrawer
+#:import FileChooserThumbView kivy.garden.filechooserthumbview
+
+#:import sm kivy.uix.screenmanager
+#:import Factory kivy.factory.Factory
+#:set color_button (.5,.5,.5,1)
+#:set color_button_pressed (1, 1, 1, 1)
+#:set color_font   (0.957, 0.890, 0.843, 1)  # off white
+
+<Screen>:
+    canvas:
+        Color:
+            rgb: .2, .2, .2
+        Rectangle:
+            size: self.size
+
+<MainPanel>
+    BoxLayout:
+        orientation: "vertical"
+        AnchorLayout:
+            anchor_x:"center"
+            anchor_y:"center"
+            spacing: "10dp"
+            size_hint: 1,None
+            height: "25dp"
+            canvas.before:
+                Color:
+                    rgb: 0.1,0.1,0.1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            BoxLayout:
+                orientation: "horizontal"
+                pading: "1dp"
+                spacing: "1dp"
+                Button:
+                    size_hint: None,1
+                    width: "60dp"
+                    background_color:.1,.1,.1,1
+                    text: "Inicio"
+                Button:
+                    disabled:True
+                    size_hint: None,1
+                    width: "60dp"
+                    background_color:.1,.1,.1,1
+                    text:"FAQ"
+                    on_release: app.myPopFAQ.open()
+                Button:
+                    disabled:True
+                    size_hint: None,1
+                    width: "60dp"
+                    background_color:.1,.1,.1,1
+                    text:"ADV"
+                    on_release: app.myPopFAQ.open()
+                Button:
+                    size_hint: None,1
+                    width: "60dp"
+                    background_color:.1,.1,.1,1
+                    text: "Ajustes"
+                    on_release: app.myPopSETTINGS.open()
+                Button:
+                    size_hint: None,1
+                    width: "60dp"
+                    background_color:.1,.1,.1,1
+                    text:"Créditos"
+                    on_release: app.myPopINFO.open()
+                BoxLayout:
+        ScreenManager:
+            id: ScrMan
+            current: myNoneUI.name
+            transition: sm.FadeTransition()
+            NoneUI:
+                id: myNoneUI
+                name: 'None UI'
+
+<NoneUI>
+    BoxLayout:
+        orientation: "vertical"
+        id:core
+        padding: "10dp"
+        spacing: "1dp"
+        canvas.before:
+            Color:
+                rgb: 0.3,0.3,0.3
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1,None
+            height: "40dp"
+            Label:
+                active:False
+                text_size: "5sp"
+                text_size: self.size
+                halign: "center"
+                valign: "middle"
+                text: "Servidor:"
+                #ellipsis_options: {'color':(1,0.5,0.5,1),'underline':True}
+            RstDocument:
+                active:False
+                text: str(app.url)
+            Button:
+                size_hint: None,1
+                width: "40dp"
+                on_release: app.myPopSETTINGS.open()
+                Image:
+                    source: "./imgs/buttons/settings.png"
+                    allow_stretch: True
+                    mipmap: True
+                    size_hint: (None, None)
+                    size: self.parent.height-dp(20), self.parent.height-dp(10)
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1,None
+            height: "60dp"
+            padding: "10dp"
+            spacing: "1dp"
+            Spinner:
+                size_hint: 1,None
+                height: "40dp"
+                id: subjects
+                text: "Materia"
+                on_text: app.spinner_subjects_update()
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: 1,None
+                height: "40dp"
+                Spinner:
+                    id: since
+                    text: "Desde"
+                Spinner:
+                    id: to
+                    text: "Hasta"
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                Label: 
+                    text: "¿Crear automáticamente una portada con el nombre de la asignatura?"
+                    text_size: self.size
+                    halign: "center"
+                    valign: "middle"
+                CheckBox:
+                    id: create_cover
+                    active: True
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                Label: 
+                    text: "¿Añadir orientaciones?"
+                    text_size: self.size
+                    halign: "center"
+                    valign: "middle"
+                CheckBox:
+                    id: orientations
+                    active: True
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                Label: 
+                    text: "¿Añadir criterios?"
+                    text_size: self.size
+                    halign: "center"
+                    valign: "middle"
+                BoxLayout:
+                    orientation:"vertical"
+                    size_hint: 1,None
+                    height: "40dp"
+                    ToggleButton:
+                        #disabled: True
+                        id:lastyear
+                        text: "Último año"
+                        group: "years"
+                    ToggleButton:
+                        #disabled: True
+                        id:allyears
+                        text: "Todos los años"
+                        group: "years"
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                Label: 
+                    text: "¿Eliminar páginas en blanco?"
+                    text_size: self.size
+                    halign: "center"
+                    valign: "middle"
+                CheckBox:
+                    id: add_blank_pages
+                    active: True
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "Carpeta a guardar el documento"
+                    text_size: self.size
+                    halign: "center"
+                    valign: "middle"
+                Button:
+                    id:path
+                    text: "..." 
+                    on_release: app.myPicChooser.open()  
+        BoxLayout: 
+            orientation: "horizontal"
+            size_hint: 1,None
+            height: "80dp"
+            Label:
+                text_size: self.size
+                halign: "center"
+                valign: "middle"
+                id:prompt
+                text:""
+            Image:
+                id: pbar
+                source: "./Imgs/Reproductor/pause_btn.zip"
+                anim_delay: 0.05
+                #allow_stretch: True
+                #mipmap: True
+        Button:
+            id: proceed
+            size_hint: 1,None
+            height: "40dp"
+            text: "Proceder" 
+            on_release: app.proceed()
+
+<PopFAQ>
+    title:'Preguntas más frecuentes'
+    size_hint:(.9,.9)
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1,None
+            height: "40dp"
+            padding: "10dp"
+            spacing: "1dp"
+            Label:
+                text: "Obtendrás un historiograma con las palabras más repetidas por fechas."   
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "Documento"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                Button:
+                    id: path
+                    text: "..." 
+                    on_release: app.myPicChooser.open() 
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                size_hint: 1,None
+                height: "40dp"
+                text: "Cancelar"
+                on_release: app.ignoreFAQ(0)
+            Button:
+                size_hint: 1,None
+                height: "40dp"
+                text: "Proceder"
+                background_color: 255,87,87
+                on_release: app.ignoreFAQ(1)
+
+<PopSETTINGS>
+    title:'Ajustes por defecto'
+    size_hint:(.9,.9)
+    ScrollView:
+        size_hint_y:None
+        size:(root.width*0.9, root.height*0.9)
+        GridLayout:
+            minimum_height:root.height
+            cols: 1
+            BoxLayout:
+                orientation: "vertical"
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1,None
+                    height: "20dp"
+                    padding: "10dp"
+                    spacing: "1dp"
+                    Label: 
+                        text: "[b]Documentos[/b]"
+                        text_size: self.size
+                        halign: "left"
+                        valign: "middle"
+                        markup:True
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1,None
+                    height: "40dp"
+                    padding: "10dp"
+                    spacing: "1dp"
+                    Label: 
+                        text: "Carpeta a guardar el documento"
+                        text_size: self.size
+                        halign: "left"
+                        valign: "middle"
+                    Button:
+                        id: path
+                        text: "..." 
+                        on_release: app.myPicChooser.open() 
+                    Button:
+                        size_hint: None,1
+                        width: "40dp"                
+                        text:"x"
+                        on_release: root.ids.path.text="..."
+            BoxLayout:
+                orientation: "vertical"
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1,None
+                    height: "20dp"
+                    padding: "10dp"
+                    spacing: "1dp"
+                    Label: 
+                        text: "[b]Portada[/b]"
+                        text_size: self.size
+                        halign: "left"
+                        valign: "middle"
+                        markup:True
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1,None
+                    height: "40dp"
+                    padding: "10dp"
+                    spacing: "1dp"
+                    Label: 
+                        text: "Imágen de la PAU"
+                        text_size: self.size
+                        halign: "left"
+                        valign: "middle"
+                    Button:
+                        id: img
+                        text: "..." 
+                        on_release: app.myPicChooser.open() 
+                    Button:
+                        size_hint: None,1
+                        width: "40dp"                
+                        text:"x"
+                        on_release: root.ids.path.text="..."
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1,None
+                    height: "40dp"
+                    padding: "10dp"
+                    spacing: "1dp"
+                    Label: 
+                        text: "Fuente de texto"
+                        text_size: self.size
+                        halign: "left"
+                        valign: "middle"
+                    Button:
+                        id: font
+                        text: "..." 
+                        on_release: app.myPicChooser.open() 
+                    Button:
+                        size_hint: None,1
+                        width: "40dp"                
+                        text:"x"
+                        on_release: root.ids.path.text="..."
+            BoxLayout:
+                orientation: "vertical"
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1,None
+                    height: "20dp"
+                    #spacing: "20dp"
+                    Label: 
+                        text: "[b]Fuente de exámenes[/b]"
+                        text_size: self.size
+                        halign: "left"
+                        valign: "middle"
+                        markup:True
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1,None
+                    height: "40dp"
+                    TextInput: 
+                        id: url
+                        hint_text: app.url
+                        text_size: self.size
+                        halign: "center"
+                        valign: "middle"
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1,None
+                    height: "40dp"
+                    padding: "10dp"
+                    spacing: "1dp"
+                    Label: 
+                        text: "Lista de exámenes y asignaturas"
+                        text_size: self.size
+                        halign: "left"
+                        valign: "middle"
+                    Button:
+                        id: upd
+                        text: "Actualizar" 
+                        on_release: app.update_table_links() 
+            BoxLayout:
+                orientation: "horizontal"
+                Button:
+                    size_hint: 1,None
+                    height: "40dp"
+                    text: "Cancelar"
+                    on_release: app.ignoreSETTINGS(0)
+                Button:
+                    size_hint: 1,None
+                    height: "40dp"
+                    text: "Guardar ajustes"
+                    background_color: 255,87,87
+                    on_release: app.ignoreSETTINGS(1)
+
+
+<PicChooser>
+    title: "Choose a path"
+    padding: "10dp"
+    spacing: "10dp"
+    GridLayout:
+        cols: 1
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1,None
+            height: "40dp"
+            Button:
+                size_hint: None,1
+                width: "40dp"
+                text: "<"
+                on_release: app.ignorePicChooser(0)
+            TextInput:
+                id: pathurl
+                text: ""
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: 1,None
+                height: "40dp"
+                Button:
+                    size_hint: None,1
+                    width: "70dp"
+                    text: "Cancelar"
+                    on_release: app.ignorePicChooser(0)
+                Button:
+                    size_hint: None,1
+                    width: "70dp"
+                    text: "Aceptar"
+                    on_release: app.ignorePicChooser(1)
+        FileChooserThumbView:
+            path: "./"
+            id: pc
+            on_selection: app.ignorePicChooser(1)
+            on_entry_added: root.ids.pathurl.text=root.ids.pc.path
+
+<PopINFO>
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "[b]Programador[/b]"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                    markup:True
+                Label: 
+                    text: "Roberto Lama Rodríguez"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                    markup:True
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "[b]Contacto[/b]"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                    markup:True
+                Label: 
+                    text: "[u][ref=world][color=a3faff]roberlama@gmail.com[/color][/ref][/u]"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                    markup:True
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "[b]Más proyectos[/b]"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                    markup:True
+                Label: 
+                    text: "[u][ref=world][color=a3faff]https://github.com/RoberWare[/color][/ref][/u]"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                    markup:True
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                size_hint: 1,None
+                height: "40dp"
+                text: "Aceptar"
+                on_release: app.ignoreINFO()
+
+
+<PopMsgUPDCOMPLETED>
+    title: "¡Trabajo completado!"
+    size_hint: (.8,.3)
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id:mylbl
+            text: "Se actualizó la lista de exámenes correctamente."
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                size_hint: 1,None
+                height: "40dp"
+                text: "OK"
+                background_color: 255,87,87
+                on_release: root.dismiss()
+
+<PopMsg>
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id:mylbl
+            text: "Se quedaron archivos sin resolver en la última sesión."
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                size_hint: 1,None
+                height: "40dp"
+                text: "ELIMINAR"
+                background_color: 255,87,87
+                on_release: app.delete_all()
+            Button:
+                size_hint: 1,None
+                height: "40dp"
+                text: "Ignorar"
+                on_release: app.ignore()
+            Button:
+                disabled:True
+                size_hint: 1,None
+                height: "40dp"
+                text: "RENAUDAR"
+                on_release: app.continue_zipping()
+
+<PopMsgERRORFILL>
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id:mylbl
+            text: "Faltan elementos por rellenar para completar esta acción."
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                size_hint: 1,None
+                height: "40dp"
+                text: "Ok"
+                background_color: 255,87,87
+                on_release: app.ignoreERRORFILL()
+
+<PopMsgWARN>
+    title: 'Aviso'
+    auto_dismiss: True
+    size_hint:(.8,.7)
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id:mylbl
+            text_size: self.size
+            halign: "center"
+            valign: "middle"
+            text: "Puede que la barra de progreso no avance, pero no por ello el programa no está funcionando. Descargar los pdf's impide que la pantalla del programa se actualice. Cuando haya finalizado se notificará por medio de un Popup como éste. Además, es posible que los criterios de algún año se añadan al pdf debido a que se pueden encontrar en el mismo documento que el exámen."
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "No volver a mostrar"
+                CheckBox:
+                    id: show_again
+                    active: False
+            BoxLayout:
+                orientation: "horizontal"
+                Button:
+                    size_hint: 1,None
+                    height: "40dp"
+                    text: "Ok"
+                    background_color: 255,87,87
+                    on_release: app.process()
+
+<PopMsgUPD>
+    BoxLayout:
+        orientation: "horizontal"
+        Label:
+            id:mylbl
+            text: "Actualizando"
+        Image:
+            id: pbar
+            source: "./imgs/animations/progress-bar/blue-barber-bar.zip"
+            anim_delay: 0.05
+            #allow_stretch: True
+            #mipmap: True
+
+<PopMsgEND>
+    title:'¡Trabajo completado!'
+    size_hint:(.8,.8)
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "vertical"
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "20dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "[b]Asignatura[/b]"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                    markup:True
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "Nombre"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                Label:
+                    id: name
+                    text: "..."
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "Fechas"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                Label:
+                    id: date
+                    text: "..."
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "20dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "[b]Documento[/b]"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                    markup:True
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1,None
+                height: "40dp"
+                padding: "10dp"
+                spacing: "1dp"
+                Label: 
+                    text: "Destino"
+                    text_size: self.size
+                    halign: "left"
+                    valign: "middle"
+                Label:
+                    id: docname
+                    text: "..."
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                size_hint: 1,None
+                height: "40dp"
+                text: "Ok"
+                background_color: 255,87,87
+                on_release: app.ignoreEND()
+
+<MyButton>:
+    myimg: ""
+    mylbl: "Dummy"
+    background_color: (0.8,0.8,0.8,1)
+    size_hint: (1,None)
+    height: "50dp"
+    BoxLayout:
+        orientation: "horizontal"
+        pos: root.pos
+        size: root.size
+        padding: "10dp"
+        spacing: "10dp"
+        Image:
+            source: root.myimg
+            allow_stretch: True
+            mipmap: True
+            pos: self.parent.pos
+            size_hint: (None, None)
+            size: self.parent.height-dp(20), self.parent.height-dp(10)
+        Label:
+            text_size: self.width, None
+            height: self.texture_size[1]
+            text: root.mylbl
+            halign: "left"
+            valign: "middle"
+
+<MySpinnerOption@SpinnerOption>:
+    background_color: color_button if self.state == 'down' else color_button_pressed
+    background_down: 'atlas://data/images/defaulttheme/button'
+    color: color_font
